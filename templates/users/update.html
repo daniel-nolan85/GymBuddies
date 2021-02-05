@@ -1,0 +1,87 @@
+<div class="mb-2">
+    {{ up_form.first_name }}
+</div>
+<div class="mb-2">
+    {{ up_form.last_name }}
+</div>
+<div class="mb-2">
+    {{ up_form.location }}
+</div>
+<div class="mb-2">
+    {{ up_form.birthday }}
+</div>
+<div class="mb-2">
+    {{ up_form.bio }}
+</div>
+<script>
+    $(document).ready(function(){
+
+        $("#update-prof").click(function(){
+            var serializedData = $('#update-form').serialize();
+            var name = document.getElementById('name')
+            var location = document.getElementById('location')
+            var birthday = document.getElementById('birthday')
+            var bio = document.getElementById('bio')
+
+            var fname = $('#id_first_name').val();
+            var lname = $('#id_last_name').val();
+            var loc = $('#id_location').val();
+            var bday = $('#id_birthday').val();
+            var myBio = $('#id_bio').val();
+
+            const getAge = birthDate => Math.floor((new Date() - new Date(birthDate).getTime()) / 3.15576e+10)
+
+            $.ajax({
+                url: '/users/update/',
+                data: serializedData,
+                type: 'post',
+                dataType: 'json',
+                success: function() {
+                    if (getAge(bday) < 18) {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'You must be at least 18 years old'
+                        })
+                    } else {
+                        $('#update').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                        name.innerHTML = fname + ' ' + lname
+                        location.innerHTML = loc
+                        birthday.innerHTML = bday
+                        bio.innerHTML = myBio
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Your profile has been updated'
+                        })
+                    }
+                },
+                error: function(error) {
+                    console.log('error')
+                }
+            })
+        });
+    });
+</script>
+
+

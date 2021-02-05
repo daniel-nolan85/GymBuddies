@@ -1,0 +1,103 @@
+{% load account socialaccount %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/line-awesome.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/line-awesome-font-awesome.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome.min.css' %}">
+		<link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/jquery.mCustomScrollbar.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'lib/slick/slick.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'lib/slick/slick-theme.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+		<title>{% block title %}Sign Up{% endblock title %} | Gym Buddies</title>
+	</head>
+
+    <body class="sign-in">
+        <div class="wrapper">
+            <div class="sign-in-page">
+                <div class="signin-popup">
+                    <div class="signin-pop">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="cmp-info">
+                                    <div class="cm-logo">
+                                        <img src="{% static 'logo/logo-pic.png' %}" alt="">
+                                        <img src="{% static 'logo/wording.png' %}" alt="">
+                                        <p>Find your perfect workout buddy today. Share posts and track your workouts.</p>
+                                    </div><!--cm-logo end-->
+                                    <img src="{% static 'logo/avatar.png' %}" alt="">
+                                </div><!--cmp-info end-->
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="login-sec">
+                                    <ul class="sign-control">
+                                        <li><a href="{{ login_url }}" title="">Sign in</a></li>
+                                        <li class="current"><a href="#" title="">Sign up</a></li>
+                                    </ul>
+                                    <div class="sign_in_sec current" id="tab-1">
+                                        <h3>Sign up</h3>
+                                        <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+                                            {% csrf_token %}
+                                            {% if form.errors %}
+                                                <div class="alert alert-danger alert-dismissible" role="alert">
+                                                    <div id="form-errors">
+                                                        {% for key, value in form.errors.items %}
+                                                            <span class="fieldWrapper">
+                                                                {{ key }} : {{ value }}
+                                                            </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            {% for field in form.visible_fields %}
+                                                <div class="row form-group">
+                                                    <div class="sn-field m-0">
+                                                        {% if field.name == 'email' %}
+                                                            <input name="email" type="text" placeholder="Email"><i class="fas fa-at"></i>
+                                                        {% elif field.name == 'username' %}
+                                                            <input name="username" type="text" placeholder="Username"><i class="la la-user"></i>
+                                                        {% elif field.name == 'password1' %}
+                                                            <input name="password1" type="password" placeholder="Password"><i class="la la-lock"></i>
+                                                        {% elif field.name == 'password2' %}
+                                                            <input name="password2" type="password" placeholder="Password confirmation"><i class="la la-lock"></i>
+                                                        {% else %}
+                                                            <input name="birthday" type="date"><i class="fas fa-birthday-cake"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+<!--                                            <input style="vertical-align: middle; width: 16px;" required type="checkbox">-->
+<!--                                            <label style="font-size: 12px; vertical-align: middle; display: inline-block; width: 250px;">-->
+<!--                                                I am at least 18 years of age-->
+<!--                                            </label>-->
+                                            <p style="font-size: 12px; line-height: 12px;">By clicking Sign Up you have agreed to our
+                                                <a href="{% url 'users:terms_conditions' %}" class="view-more-pro">Terms and Conditions</a>. You can learn how your data may be collected, used and shared by reading our
+                                                <a href="{% url 'users:privacy' %}" class="view-more-pro">Privacy Policy</a>, and also how we use cookies and similar technology in our
+                                                <a href="{% url 'users:cookies' %}" class="view-more-pro">Cookies Policy</a>.
+                                            </p>
+
+                                            <button style="float: right;" type="submit">Sign Up</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+

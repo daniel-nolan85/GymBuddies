@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}My Sent Invites{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>Invites Sent</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <section class="companies-info">
+        <div class="container">
+            <div class="companies-list">
+                <div class="row">
+                    {% if is_empty %}
+                        <h1 class="ml-5">You do not currently have any Buddies pending...</h1>
+                    {% endif %}
+                    {% for item in qs %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                            <div class="company_profile_info">
+                                <div class="company-up-info">
+                                    <img src="{{ item.avatar.url }}" alt="">
+                                    <h3 class="mb-4"><a href="{% url 'users:profile_detail' slug=item.slug sender_id=request.user.id %}" title="" class="view-more-pro">{{ item.user }}</a></h3>
+                                    <h4>{{ item.status }}</h4>
+                                    <ul>
+                                        <li>
+                                            <form action="{% url 'users:cancel_invite' %}" method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="profile_pk" value="{{ item.pk }}">
+                                                <button type="submit" class="message-us" style="border: none;"><i class="fas fa-minus pr-2"></i>Cancel</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div><!--company_profile_info end-->
+                        </div>
+                    {% endfor %}
+                </div>
+            </div><!--companies-list end-->
+        </div>
+    </section><!--companies-info end-->
+{% endblock %}

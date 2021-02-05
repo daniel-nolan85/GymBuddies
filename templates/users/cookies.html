@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+		<title>{% block title %}Privacy Policy{% endblock title %} | Gym Buddies</title>
+	</head>
+	<body style="background: #04babd;">
+		<!--================Home Banner Area =================-->
+        <section class="banner_area">
+            <div class="banner_inner d-flex align-items-center">
+                <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+                <div class="container">
+                    <div class="banner_content text-center">
+                        <h2>Cookies Policy</h2>
+						<br>
+                    	<div class="page_link">
+                        	<a href="{% url 'account_signup' %}">Sign Up</a>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--================End Home Banner Area =================-->
+		<section class="forum-page">
+            <div class="container">
+                <div class="policy">
+					<h1><strong>What are cookies?</strong></h1>
+					<div class="blank-row"></div>
+					<div>A cookie is a file containing an identifier (a string of letters and numbers) that is sent by a web server to a web browser and is stored by the browser. The identifier is then sent back to the server each time the browser requests a page from the server.</div>
+					<div class="blank-row"></div>
+					<div>Cookies may be either "persistent" cookies or "session" cookies: a persistent cookie will be stored by a web browser and will remain valid until its set expiry date, unless deleted by the user before the expiry date; a session cookie, on the other hand, will expire at the end of the user session, when the web browser is closed.</div>
+					<div class="blank-row"></div>
+					<div>Cookies do not typically contain any information that personally identifies a user, but personal information that we store about you may be linked to the information stored in and obtained from cookies.</div>
+					<br>
+					<br>
+					<h1><strong>What cookies do we use?</strong></h1>
+					<div class="blank-row"></div>
+					<div>We use cookies for the following purposes:</div>
+					<div class="small-row"></div>
+					<p>status - we use cookies to help us to determine if you are logged into our website;</p>
+					<p>security - we use cookies as an element of the security measures used to protect user accounts, including preventing fraudulent use of login credentials, and to protect our website and services generally;</p>
+					<br>
+					<br>
+					<h1><strong>What cookies are used by our service providers?</strong></h1>
+					<div class="blank-row"></div>
+					<div>Our service providers use cookies and those cookies may be stored on your computer when you visit our website.</div>
+					<br>
+					<br>
+					<h1><strong>Managing cookies</strong></h1>
+					<div class="blank-row"></div>
+					<div>Most browsers allow you to refuse to accept cookies and to delete cookies. The methods for doing so vary from browser to browser, and from version to version. You can however obtain up-to-date information about blocking and deleting cookies via these links:</div>
+					<div class="small-row"></div>
+					<p><a href="https://support.google.com/chrome/answer/95647?hl=en" style="font-weight: bold;">Chrome</a></p>
+					<div class="small-row"></div>
+					<p><a href="https://support.mozilla.org/en-US/kb/enable-and-disable-cookies-website-preferences" style="font-weight: bold;">Firefox</a></p>
+					<div class="small-row"></div>
+					<p><a href="http://www.opera.com/help/tutorials/security/cookies/" style="font-weight: bold;">Opera</a></p>
+					<div class="small-row"></div>
+					<p><a href="https://support.microsoft.com/en-gb/help/17442/windows-internet-explorer-delete-manage-cookies" style="font-weight: bold;">Internet Explorer</a></p>
+					<div class="small-row"></div>
+					<p><a href="https://support.apple.com/kb/PH21411" style="font-weight: bold;">Safari</a></p>
+					<div class="small-row"></div>
+					<p><a href="https://privacy.microsoft.com/en-us/windows-10-microsoft-edge-and-privacy" style="font-weight: bold;">Edge</a></p>
+					<div class="blank-row"></div>
+					<div>Blocking all cookies will have a negative impact upon the usability of many websites.</div>
+					<div class="blank-row"></div>
+					<div>If you choose to block cookies, you will not be able to use all the features on our website.</div>
+					<div class="blank-row"></div>
+					<div class="text-center">
+						<button type="button" class="signup-btn"><a href="{% url 'account_signup' %}">Sign Up</a></button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</body>
+</html>

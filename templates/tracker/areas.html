@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Choose an Area{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>Areas</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+<!--================End Home Banner Area =================-->
+    <main>
+		<div class="main-section">
+			<div class="container">
+				<div class="main-section-data">
+					<div class="row">
+						<div class="col-lg-8 no-pd">
+                            <div class="main-ws-sec">
+                                <h1>Which area of the body are you going to focus on today?</h1>
+                                <form id="addAreaForm" method="post" class="form-inline my-3" data-url="{% url 'tracker:areas' %}">
+                                    {% csrf_token %}
+                                    <div class="mr-3">
+                                        {{ form }}
+                                    </div>
+                                    <button id="addAreaButton" type="button" class="btn btn-primary" style="background-color: #04babd; border-color: #04babd;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                                <div id="areaList" class="posts-section">
+                                    {% for area in areas %}
+                                        {% if area.user.user == request.user %}
+                                            <div id="areaCard" class="card" data-id="{{ area.id }}">
+                                                <div class="card-body message-form-btns">
+                                                    <h3><a class="area-link" href="{% url 'tracker:exercises' area.pk %}">{{ area.name|title }}</a></h3>
+                                                    <a href="" data-toggle="modal" data-target="#delete{{area.id}}"><i class="fas fa-trash"></i></a>
+                                                    <!-- modal -->
+                                                    <div class="modal fade" id="delete{{area.id}}" role="dialog">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <!-- modal header -->
+                                                                <div class="modal-header">
+                                                                    <h3 class="modal-title" style="color: #fff;">Do you really want to delete {{ area.name }}?</h3>
+                                                                </div>
+                                                                <!-- modal body -->
+                                                                <div class="modal-body"><p>All exercises related to this area will be permanently deleted</p></div>
+                                                                <!-- modal footer -->
+                                                                <div class="modal-footer message-btn">
+                                                                    <button id="areaDelete" type="submit" class="active" data-id="{{ area.id }}">Yes, Delete</button>
+                                                                    <button type="button" data-dismiss="modal">Cancel</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- end of modal -->
+                                                </div>
+                                            </div><!--post-bar end-->
+                                        {% endif %}
+                                    {% endfor %}
+								</div><!--posts-section end-->
+							</div><!--main-ws-sec end-->
+						</div>
+						{% include 'right_side.html' %}
+					</div>
+				</div><!-- main-section-data end-->
+			</div>
+		</div>
+	</main>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            $('#addAreaButton').click(function() {
+                var serializedData = $('#addAreaForm').serialize();
+
+
+                $.ajax({
+                    url: $('#addAreaForm').data('url'),
+                    data: serializedData,
+                    type: 'POST',
+                    success: function(response) {
+                        var url = "{% url 'tracker:exercises' 123 %}";
+                        var newUrl = url.replace('123', response.area.id);
+                        $('#areaList').append('<div id="areaCard" class="card" data-id="' + response.area.id + '"><div class="card-body"><div class="usy-dt"><div class="usy-name"><ul><li><h3><a href="' + newUrl + '">' + response.area.name + '</a></h3></li></ul></div></div><div class="ed-opts"><ul class="bk-links"><li><a href="" data-toggle="modal" data-target="#delete' + response.area.id + '"><i class="fas fa-trash"></i></a></li><div class="modal fade" id="delete' + response.area.id + '" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Do you really want to delete ' + response.area.name + '?</h3></div><div class="modal-body" style="padding: 10px;"><p>All exercises related to this area will be permanently deleted</p></div><div class="modal-footer"><button id="areaDelete" type="submit" class="active" data-id="' + response.area.id + '">Yes, Delete</button><button type="button" data-dismiss="modal">Cancel</button></div></div></div></div></div></div></div></div>')
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Area added'
+                        })
+                    },
+                    error: function(response) {
+                        console.log('error', response)
+                    }
+                })
+
+                $('#addAreaForm')[0].reset();
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+            $('#areaList').on('click', '#areaDelete', function() {
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+                $.ajax({
+                    url: '/tracker/area-delete/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                        $('#areaCard[data-id="' + dataId + '"]').remove()
+                        $('#delete{{area.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Area deleted'
+                        })
+                    },
+                    error: function(response) {
+                        console.log('error')
+                    }
+                })
+            });
+        });
+    </script>
+
+{% endblock %}

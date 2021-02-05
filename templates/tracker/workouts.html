@@ -1,0 +1,925 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Your Workout{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>{{ exercise.name|title }}</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+<!--================End Home Banner Area =================-->
+    <main>
+		<div class="main-section">
+			<div class="container">
+				<div class="main-section-data">
+					<div class="row">
+						<div class="col-lg-8 no-pd">
+                            <div class="main-ws-sec">
+
+                                <!-- #### Weight & Reps ####-->
+                                {% if exercise.type.pk == 1 %}
+                                    <div class="workout">
+                                        <form action="{% url 'tracker:weight_rep' exercise.pk %}" method="post" class="form-inline">
+                                            {% csrf_token %}
+                                            <div class="mr-3 mb-3">
+                                                {{ wr_form.weight }}
+                                            </div>
+                                            <div class="mr-3 mb-3">
+                                                {{ wr_form.pref_weight }}
+                                            </div>
+                                            <div class="mr-3 mb-3">
+                                                {{ wr_form.reps }}
+                                            </div>
+                                            <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3 saveBtn" data-id="{{ exercise.id }}" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                        </form>
+                                    </div>
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <input type="hidden" name="pref_weight" value="{{ pref_weight }}">
+                                                        <input type="hidden" name="pref_dist" value="{{ pref_dist }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div style="display: flex; justify-content: start;">
+                                                                {% for exc in m_weight %}
+                                                                    {% if exc == exercise %}
+                                                                        {% if w.weight == exc.max_weight%}
+                                                                            <i class="fas fa-trophy" style="background-color: #FFD700;"></i>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                <div>
+                                                                    {% if w.pref_weight == 'kg' %}
+                                                                        <h3 class="mb-1">You pushed {{ w.reps }} reps of {{ w.weight }}kgs</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% else %}
+                                                                        <h3 class="mb-1">You pushed {{ w.reps }} reps of {{ w.weight }}lbs</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Weight & Distance ####-->
+                                {% elif exercise.type.pk == 2 %}
+                                    <form action="{% url 'tracker:weight_dist' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ wd_form.weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wd_form.pref_weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wd_form.distance }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wd_form.pref_dist }}
+                                        </div>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div style="display: flex; justify-content: start;">
+                                                                {% for exc in m_weight %}
+                                                                    {% if exc == exercise %}
+                                                                        {% if w.weight == exc.max_weight%}
+                                                                            <i class="fas fa-trophy" style="background-color: #FFD700;"></i>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                <div>
+                                                                    {% if w.pref_weight == 'kg' and w.pref_dist == 'm' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}m</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'm'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}m</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'ft' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}ft</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'ft'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}ft</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'mi' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}mi</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'mi'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}mi</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'km' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}km</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% else %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}km</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Weight & Time ####-->
+                                {% elif exercise.type.pk == 3 %}
+                                    <form action="{% url 'tracker:weight_time' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ wt_form.weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wt_form.pref_weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wt_form.time }}
+                                        </div>
+                                        <a href="" data-toggle="modal" data-target="#stopwatch"><i class="fas fa-stopwatch mb-3 mr-3" style="font-size: 32px; color: #04babd;"></i></a>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    {% if exercise.workout_set.all %}
+                                        {% for w in exercise.workout_set.all %}
+                                            {% if w.user.user == request.user %}
+                                                <div class="card" data-id="{{ w.id }}">
+                                                    <div class="card-body message-form-btns">
+                                                        <div style="display: flex; justify-content: start;">
+                                                            {% for exc in m_weight %}
+                                                                {% if exc == exercise %}
+                                                                    {% if w.weight == exc.max_weight%}
+                                                                        <i class="fas fa-trophy" style="background-color: #FFD700;"></i>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            <div>
+                                                                {% if w.pref_weight == 'kg' %}
+                                                                    <h3 class="mb-1">You held {{ w.weight }}kgs for {{ w.time }}</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% else %}
+                                                                    <h3 class="mb-1">You held {{ w.weight }}lbs for {{ w.time }}</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                        <!-- modal -->
+                                                        <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <!-- modal header -->
+                                                                    <div class="modal-header">
+                                                                        <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                    </div>
+                                                                    <!-- modal body -->
+                                                                    <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                    <!-- modal footer -->
+                                                                    <div class="modal-footer message-btn">
+                                                                        <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                        <button type="button" data-dismiss="modal">Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- end of modal -->
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+
+
+                                <!-- #### Reps & Distance ####-->
+                                {% elif exercise.type.pk == 4 %}
+                                    <form action="{% url 'tracker:rep_dist' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ rd_form.reps }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ rd_form.distance }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ rd_form.pref_dist }}
+                                        </div>
+
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div>
+                                                                {% if w.pref_dist == 'm' %}
+                                                                    <h3 class="mb-1">You pushed {{ w.reps }} reps over {{ w.distance }}m</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% elif w.pref_dist == 'ft' %}
+                                                                    <h3 class="mb-1">You pushed {{ w.reps }} reps over {{ w.distance }}ft</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% elif w.pref_dist == 'mi' %}
+                                                                    <h3 class="mb-1">You pushed {{ w.reps }} reps over {{ w.distance }}mi</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% else %}
+                                                                    <h3 class="mb-1">You pushed {{ w.reps }} reps over {{ w.distance }}km</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% endif %}
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Reps & Time ####-->
+                                {% elif exercise.type.pk == 5 %}
+                                    <form action="{% url 'tracker:rep_time' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ rt_form.reps }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ rt_form.time }}
+                                        </div>
+                                        <a href="" data-toggle="modal" data-target="#stopwatch"><i class="fas fa-stopwatch mb-3 mr-3" style="font-size: 32px; color: #04babd;"></i></a>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div>
+                                                                <h3 class="mb-1">You pushed {{ w.reps }} reps in {{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Distance & Time ####-->
+                                {% elif exercise.type.pk == 6 %}
+                                    <form action="{% url 'tracker:distance_time' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ dt_form.distance }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ dt_form.pref_dist }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ dt_form.time }}
+                                        </div>
+                                        <a href="" data-toggle="modal" data-target="#stopwatch"><i class="fas fa-stopwatch mb-3 mr-3" style="font-size: 32px; color: #04babd;"></i></a>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    {% if exercise.workout_set.all %}
+                                        {% for w in exercise.workout_set.all %}
+                                            {% if w.user.user == request.user %}
+                                                <div class="card" data-id="{{ w.id }}">
+                                                    <div class="card-body message-form-btns">
+                                                        <div>
+                                                            {% if w.pref_dist == 'm' %}
+                                                                <h3 class="mb-1">You travelled {{ w.distance }}m in {{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            {% elif w.pref_dist == 'ft' %}
+                                                                <h3 class="mb-1">You travelled {{ w.distance }}ft in {{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            {% elif w.pref_dist == 'mi' %}
+                                                                <h3 class="mb-1">You travelled {{ w.distance }}mi in {{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            {% else %}
+                                                                <h3 class="mb-1">You travelled {{ w.distance }}km in {{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                        <!-- modal -->
+                                                        <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <!-- modal header -->
+                                                                    <div class="modal-header">
+                                                                        <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                    </div>
+                                                                    <!-- modal body -->
+                                                                    <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                    <!-- modal footer -->
+                                                                    <div class="modal-footer message-btn">
+                                                                        <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                        <button type="button" data-dismiss="modal">Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- end of modal -->
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+
+
+                                <!-- #### Weight ####-->
+                                {% elif exercise.type.pk == 7 %}
+                                    <form action="{% url 'tracker:weight' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ w_form.weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ w_form.pref_weight }}
+                                        </div>
+
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div style="display: flex; justify-content: start;">
+                                                                {% for exc in m_weight %}
+                                                                    {% if exc == exercise %}
+                                                                        {% if w.weight == exc.max_weight%}
+                                                                            <i class="fas fa-trophy" style="background-color: #FFD700;"></i>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                <div>
+                                                                    {% if w.pref_weight == 'kg' %}
+                                                                        <h3 class="mb-1">You lifted {{ w.weight }}kgs</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% else %}
+                                                                        <h3 class="mb-1">You lifted {{ w.weight }}lbs</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Reps ####-->
+                                {% elif exercise.type.pk == 8 %}
+                                    <form action="{% url 'tracker:rep' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ r_form.reps }}
+                                        </div>
+
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div>
+                                                                <h3 class="mb-1">You pushed {{ w.reps }} reps</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Distance ####-->
+                                {% elif exercise.type.pk == 9 %}
+                                    <form action="{% url 'tracker:dist' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ d_form.distance }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ d_form.pref_dist }}
+                                        </div>
+
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div>
+                                                                {% if w.pref_dist == 'm' %}
+                                                                    <h3 class="mb-1">You travelled {{ w.distance }}m</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% elif w.pref_dist == 'ft' %}
+                                                                    <h3 class="mb-1">You travelled {{ w.distance }}ft</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% elif w.pref_dist == 'mi' %}
+                                                                    <h3 class="mb-1">You travelled {{ w.distance }}mi</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% else %}
+                                                                    <h3 class="mb-1">You travelled {{ w.distance }}km</h3>
+                                                                    <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                {% endif %}
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Time ####-->
+                                {% elif exercise.type.pk == 10 %}
+                                    <form action="{% url 'tracker:time' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ t_form.time }}
+                                        </div>
+                                        <a href="" data-toggle="modal" data-target="#stopwatch"><i class="fas fa-stopwatch mb-3 mr-3" style="font-size: 32px; color: #04babd;"></i></a>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div>
+                                                                <h3 class="mb-1">{{ w.time }}</h3>
+                                                                <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+
+
+                                <!-- #### Weight, Distance & Time ####-->
+                                {% elif exercise.type.pk == 11 %}
+                                    <form action="{% url 'tracker:weight-dist-time' exercise.pk %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <div class="mr-3 mb-3">
+                                            {{ wdt_form.weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wdt_form.pref_weight }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wdt_form.distance }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wdt_form.pref_dist }}
+                                        </div>
+                                        <div class="mr-3 mb-3">
+                                            {{ wdt_form.time }}
+                                        </div>
+                                        <a href="" data-toggle="modal" data-target="#stopwatch"><i class="fas fa-stopwatch mb-3 mr-3" style="font-size: 32px; color: #04babd;"></i></a>
+                                        <button type="submit" name="save_workout" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">Save</button>
+                                    </form>
+
+                                    <div class="posts-section">
+                                        {% if exercise.workout_set.all %}
+                                            {% for w in exercise.workout_set.all %}
+                                                {% if w.user.user == request.user %}
+                                                    <div class="card" data-id="{{ w.id }}">
+                                                        <div class="card-body message-form-btns">
+                                                            <div style="display: flex; justify-content: start;">
+                                                                {% for exc in m_weight %}
+                                                                    {% if exc == exercise %}
+                                                                        {% if w.weight == exc.max_weight%}
+                                                                            <i class="fas fa-trophy" style="background-color: #FFD700;"></i>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                <div>
+                                                                    {% if w.pref_weight == 'kg' and w.pref_dist == 'm' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}m in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'm'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}m in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'ft' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}ft in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'ft'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}ft in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'mi' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}mi in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'lb' and w.pref_dist == 'mi'%}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}mi in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% elif w.pref_weight == 'kg' and w.pref_dist == 'km' %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}kgs over {{ w.distance }}km in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% else %}
+                                                                        <h3 class="mb-1">You carried {{ w.weight }}lbs over {{ w.distance }}km in {{ w.time }}</h3>
+                                                                        <span style="color: #b2b2b2;">{{ w.created }}</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                            <a href="" data-toggle="modal" data-target="#delete{{w.id}}"><i class="fas fa-trash"></i></a>
+                                                            <!-- modal -->
+                                                            <div class="modal fade" id="delete{{w.id}}" role="dialog">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <!-- modal header -->
+                                                                        <div class="modal-header">
+                                                                            <h3 class="modal-title" style="color: #fff;">Do you really want to delete this workout?</h3>
+                                                                        </div>
+                                                                        <!-- modal body -->
+                                                                        <div class="modal-body"><p>This workout will be permanently deleted</p></div>
+                                                                        <!-- modal footer -->
+                                                                        <div class="modal-footer message-btn">
+                                                                            <button class="workoutDelete" type="button" data-id="{{ w.id }}">Yes, Delete</button>
+                                                                            <button type="button" data-dismiss="modal">Cancel</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- end of modal -->
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                        </div>
+                        {% include 'right_side.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- stopwatch -->
+        <div class="modal fade" id="stopwatch" role="dialog">
+            <div class="modal-dialog stopwatch" style="width: 305px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">On your marks, get set...</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div id="timerContainer">
+                            <svg width="260" height="260">
+                                <circle id="animateCircle" cx="125" cy="125" r="120" stroke="#8cdadb" stroke-width="10" fill="none" stroke-linecap="round" />
+                                <circle class="defaultCircle" cx="125" cy="125" r="120" stroke="#04babd" stroke-width="10" fill="none" stroke-linecap="round" />
+                            </svg>
+
+                            <span class="timer" onclick="startTimer()">00:00:00:00</span>
+
+                            <div class="row mt-2">
+                                <div class="startTimer reset" onclick="startTimer()" >
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="pauseTimer reset" onclick="pauseTimer()" >
+                                    <i class="fas fa-pause"></i>
+                                </div>
+                                <div class="resetTimer reset" onclick="resetTimer()">Reset</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                       <button type="button" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- delete workouts -->
+    <script>
+        $(document).ready(function() {
+            var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+            $('.modal-footer').on('click', '.workoutDelete', function() {
+                console.log('click')
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+                $.ajax({
+                    url: '/tracker/workout-delete/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                        console.log('success')
+                        $('.card[data-id="' + dataId + '"]').remove()
+                        $('#delete{{w.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Workout deleted'
+                        })
+                    },
+                    error: function(response) {
+                        console.log('error')
+                    }
+                })
+            });
+        });
+    </script>
+
+<!-- Stopwatch-->
+    <script>
+
+    var startTimerButton = document.querySelector('.startTimer');
+    var pauseTimerButton = document.querySelector('.pauseTimer');
+    var timerDisplay = document.querySelector('.timer');
+    var startTime;
+    var updatedTime;
+    var difference;
+    var tInterval;
+    var savedTime;
+    var paused = 0;
+    var running = 0;
+
+    function startTimer(){
+        if(!running){
+            startTime = new Date().getTime();
+            tInterval = setInterval(getShowTime, 1);
+            paused = 0;
+            running = 1;
+
+            startTimerButton.style.cursor = "auto";
+            pauseTimerButton.style.cursor = "pointer";
+            $('#animateCircle').addClass('addAnimation');
+            $('#animateCircle.addAnimation').css('animation-play-state', 'running');
+        }
+    }
+
+    function pauseTimer(){
+        if (!difference){
+            // if timer never started, don't allow pause button to do anything
+        } else if (!paused) {
+            clearInterval(tInterval);
+            savedTime = difference;
+            paused = 1;
+            running = 0;
+
+            startTimerButton.style.cursor = "pointer";
+            pauseTimerButton.style.cursor = "auto";
+            $('#animateCircle').css('animation-play-state', 'paused');
+        } else {
+            startTimer();
+        }
+    }
+
+    function resetTimer(){
+        clearInterval(tInterval);
+        savedTime = 0;
+        difference = 0;
+        paused = 0;
+        running = 0;
+        timerDisplay.innerHTML = '00:00:00:00';
+
+        startTimerButton.style.cursor = "pointer";
+        pauseTimerButton.style.cursor = "auto";
+        $('#animateCircle').removeClass('addAnimation');
+    }
+
+    function getShowTime(){
+        updatedTime = new Date().getTime();
+        if (savedTime){
+            difference = (updatedTime - startTime) + savedTime;
+        } else {
+            difference =  updatedTime - startTime;
+        }
+        // var days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        var milliseconds = Math.floor((difference % (1000 * 60)) / 10);
+
+        hours = (hours < 10) ? "0" + hours : hours;
+        minutes = (minutes < 10) ? "0" + minutes : minutes;
+        seconds = (seconds < 10) ? "0" + seconds : seconds;
+        milliseconds = (milliseconds < 10) ? "0" + milliseconds : milliseconds;
+
+        var millsToText = milliseconds.toString();
+        var lastChar = millsToText.slice(-2);
+        var lastDigits = +(lastChar); //convert last characters to numbers
+
+        timerDisplay.innerHTML = hours + ':' + minutes + ':' + seconds + ':' + lastDigits;
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Post{% endblock %}
+
+{% block content %}
+
+    <!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>Update Post</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+<main>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 no-pd">
+                <div class="sign_in_sec current">
+                    <div id="img-alert-box"></div>
+                    <div id="vid-alert-box"></div>
+                    <div id="img-box"></div>
+                    <div id="vid-box"></div>
+                    <form method="post" enctype="multipart/form-data" id="post-update-form">
+                        {% csrf_token %}
+                        {% if form.errors %}
+                            <div id="errors">
+                                <div class="inner">
+                                    <p style="color: red;">Please correct the below errors</p>
+                                    <ul>
+                                        {% for field in form %}
+                                            {% if field.errors %}
+                                                <li>{{ form.label }} {{ field.errors|striptags }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="row">
+
+                            <div class="col-lg-12 no-pdd">
+                                <div class="sn-field">
+                                    {{ form.content }}
+                                </div><!--sn-field end-->
+                            </div>
+
+                            <label><i class="fas fa-camera mr-5 ml-3" style="font-size:30px; cursor: pointer;"></i>
+                                {{ form.image }}
+                            </label>
+                            <label><i class="fas fa-video mr-5" style="font-size:30px; cursor: pointer;"></i>
+                                {{ form.video }}
+                            </label>
+                            <span style="font-size:30px;">
+                                {{ form.category }}
+                            </span>
+
+                            <div class="col-lg-12 no-pdd">
+                                <button type="submit" value="submit">Update Post</button>
+                            </div>
+                        </div>
+                    </form>
+                    <br>
+                    <div id="progress-box" class="d-none">Progress</div>
+                    <br>
+                    <div id="cancel-box" class="d-none mt-3">
+                        <button id="cancel-btn" class="btn btn-danger">Cancel</button>
+                    </div>
+                </div><!--sign_in_sec end-->
+            </div>
+            {% include 'right_side.html' %}
+        </div>
+    </div>
+</main>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!--	add posts-->
+	<script>
+		const postUpdateForm = document.getElementById('post-update-form')
+		const imgInput = document.getElementById('id_image')
+		const vidInput = document.getElementById('id_video')
+		const imgAlertBox = document.getElementById('img-alert-box')
+		const vidAlertBox = document.getElementById('vid-alert-box')
+		const imgBox = document.getElementById('img-box')
+		const vidBox = document.getElementById('vid-box')
+		const progressBox = document.getElementById('progress-box')
+		const cancelBox = document.getElementById('cancel-box')
+		const cancelBtn = document.getElementById('cancel-btn')
+		const csrf = document.getElementsByName('csrfmiddlewaretoken')
+
+		// add an image
+		imgInput.addEventListener('change', () => {
+			progressBox.classList.remove('d-none')
+			cancelBox.classList.remove('d-none')
+
+			const img_data = imgInput.files[0]
+			const url = URL.createObjectURL(img_data)
+			console.log(img_data)
+
+			const fd = new FormData()
+			fd.append('csrfmiddlewaretoken', csrf[0].value)
+			fd.append('image', img_data)
+
+			$.ajax({
+				type: 'POST',
+				url: postUpdateForm.action,
+				enctype: 'multipart/form-data',
+				data: fd,
+				beforeSend: function() {
+					console.log('before')
+					imgAlertBox.innerHTML = ''
+					imgBox.innerHTML = ''
+				},
+				xhr: function() {
+					const xhr = new window.XMLHttpRequest();
+					xhr.upload.addEventListener('progress', e => {
+						if (e.lengthComputable) {
+							const percent = e.loaded / e.total * 100
+							console.log(percent)
+							progressBox.innerHTML = `<div class="progress">
+														<div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+													 </div>`
+						}
+					})
+					cancelBtn.addEventListener('click', () => {
+						xhr.abort()
+						setTimeout(() => {
+							postForm.reset()
+							progressBox.innerHTML = ''
+							imgAlertBox.innerHTML = ''
+							cancelBox.classList.add('d-none')
+						}, 2000)
+
+					})
+					return xhr
+				},
+				success: function(response) {
+					console.log(response)
+					imgBox.innerHTML = `<img src='${url}' height='200px' class='mr-3 mb-3'>`
+					imgAlertBox.innerHTML = `<div class="alert alert-success" role="alert">
+                                    			Your image is now ready to post
+										 	 </div>`
+					cancelBox.classList.add('d-none')
+				},
+				error: function(error) {
+					console.log(error)
+					imgAlertBox.innerHTML = `<div class="alert alert-danger" role="alert">
+                                    			Oops... something went wrong
+										  	 </div>`
+				},
+				cache: false,
+				contentType: false,
+				processData: false,
+			})
+		})
+
+		// add a video
+		vidInput.addEventListener('change', () => {
+			progressBox.classList.remove('d-none')
+			cancelBox.classList.remove('d-none')
+
+			const vid_data = vidInput.files[0]
+			const url = URL.createObjectURL(vid_data)
+			console.log(vid_data)
+
+			const fd = new FormData()
+			fd.append('csrfmiddlewaretoken', csrf[0].value)
+			fd.append('video', vid_data)
+
+			$.ajax({
+				type: 'POST',
+				url: postUpdateForm.action,
+				enctype: 'multipart/form-data',
+				data: fd,
+				beforeSend: function() {
+					console.log('before')
+					vidAlertBox.innerHTML = ''
+					vidBox.innerHTML = ''
+				},
+				xhr: function() {
+					const xhr = new window.XMLHttpRequest();
+					xhr.upload.addEventListener('progress', e => {
+						if (e.lengthComputable) {
+							const percent = e.loaded / e.total * 100
+							console.log(percent)
+							progressBox.innerHTML = `<div class="progress">
+														<div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+													 </div>`
+						}
+					})
+					cancelBtn.addEventListener('click', () => {
+						xhr.abort()
+						setTimeout(() => {
+							postForm.reset()
+							progressBox.innerHTML = ''
+							vidAlertBox.innerHTML = ''
+							cancelBox.classList.add('d-none')
+						}, 2000)
+
+					})
+					return xhr
+				},
+				success: function(response) {
+					console.log(response)
+					vidBox.innerHTML = `<video height='200px' class='mb-3'><source src='${url}' type='video/mp4'></video>`
+					vidAlertBox.innerHTML = `<div class="alert alert-success" role="alert">
+                                    			Your video is now ready to post
+                                  		  	 </div>`
+					cancelBox.classList.add('d-none')
+				},
+				error: function(error) {
+					console.log(error)
+					vidAlertBox.innerHTML = `<div class="alert alert-danger" role="alert">
+                                    			Oops... something went wrong
+										  	 </div>`
+				},
+				cache: false,
+				contentType: false,
+				processData: false,
+			})
+		})
+	</script>
+
+	<script type="text/javascript">
+
+		$(document).ready(function(){
+        $(".show-hide-txt").click(function(){
+            var id = $(this).data("id");
+            $("#half-"+id).hide();
+            $("#full-"+id).show();
+        });
+    });
+
+	</script>
+{% endblock %}
