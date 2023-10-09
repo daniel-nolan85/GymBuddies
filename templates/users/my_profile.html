@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+ <!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>{{ request.user }}</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <main>
+        <div class="main-section">
+            <div class="container">
+                <div class="main-section-data">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="main-left-sidebar">
+                                <div class="user_profile">
+                                    <div class="user-pro-img" data-pic="{{ profile.get_avatar }}">
+                                        <img class="d-block border border-dark rounded-circle img-fluid mx-auto profile-image" src="{{ profile.get_avatar }}" alt="" style="cursor: pointer;" data-toggle="modal" data-target="#profilePicModal">
+                                        <div class="add-dp">
+                                            <label data-toggle="modal" data-target="#update-pic" style="cursor: pointer;"><i class="fas fa-camera"></i></label>
+                                        </div>
+                                    </div><!--user-pro-img end-->
+
+                                    <ul class="social_links">
+                                        <li>
+                                            Buddies
+                                            <span class="badge badge-primary">{{ profile.get_buddies_num }}</span>
+                                        </li>
+                                        <li>
+                                            Posts
+                                            <span class="badge badge-primary">{{ profile.get_posts_num }}</span>
+                                        </li>
+                                        <li>
+                                            High Fives Given
+                                            <span class="badge badge-primary">{{ profile.get_high_fives_given_num }}</span>
+                                        </li>
+                                        <li>
+                                            High Fives Received
+                                            <span class="badge badge-primary">{{ profile.get_high_fives_received_num }}</span>
+                                        </li>
+                                        <li>
+                                            Buddy Since
+                                            <span>{{ profile.created|date }}</span>
+                                        </li>
+                                    </ul>
+                                </div><!--user_profile end-->
+                            </div><!--main-left-sidebar end-->
+                        </div>
+                        <div class="col-lg-9">
+                            <div class="main-ws-sec">
+                                <div class="message-btn" style="float: right;">
+                                    <button data-toggle="modal" data-target="#update" type="submit" style="border: none; color: #fff;"><i class="fas fa-edit"></i>Edit Profile</button>
+                                </div>
+                                <!-- modal -->
+                                <div class="modal" tabindex="-1" id="update">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Update your profile</h5>
+                                            </div>
+                                            <form action="{% url 'users:update' %}" method="post" enctype="multipart/form-data" class="p-3" id="update-form">
+                                                <div class="modal-body">
+                                                    {% csrf_token %}
+                                                    {% update_profile_tag %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <div class="message-btn active">
+                                                        <button id="update-prof" type="button"><i class="fas fa-edit"></i>Update</button>
+                                                        <button type="button" data-dismiss="modal">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end of modal -->
+                                <div class="user-tab-sec rewivew">
+                                    <div class="row">
+                                        <h3 id="name">{{ profile.first_name }} {{ profile.last_name }}</h3>
+                                    </div>
+
+                                    <div class="tab-feed st2 settingjb">
+                                        <ul>
+                                            <li data-tab="feed-dd" class="active">
+                                                <a href="#" title="">
+                                                    <img src="{static 'images/ic1.png' %}" alt="">
+                                                    <span>Posts</span>
+                                                </a>
+                                            </li>
+                                            <li data-tab="info-dd">
+                                                <a href="#" title="">
+                                                    <img src="{static 'images/ic2.png' %}" alt="">
+                                                    <span>Info</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div><!-- tab-feed end-->
+                                </div><!--user-tab-sec end-->
+
+                                <!-- **** FEED **** -->
+                                <div class="product-feed-tab current" id="feed-dd">
+                                    <div class="posts-section infinite-container">
+                                        {% if get_posts_num == 0 %}
+                                            You have no posts yet
+                                        {% else %}
+                                            {% for post in profile.get_all_authors_posts %}
+                                                <div class="post-bar infinite-item" data-id="{{ post.id }}">
+                                                    <div class="post_topbar">
+                                                        <div class="usy-dt mb-2">
+                                                            <img src="{{ post.author.get_avatar }}" alt="" style="height: 30px;">
+                                                            <div class="usy-name">
+                                                                <h3><a href="#">{{ post.author.user }}</a></h3>
+                                                                <span><img src="{% static 'images/clock.png' %}" alt="">{{ post.created|timesince }}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="ed-opts">
+                                                            <ul class="bk-links">
+                                                                {% if post.author.user == request.user %}
+                                                                    <li><a href="{% url 'posts:update' post.id %}"><i class="fas fa-edit"></i></a></li>
+                                                                    <li><a href="" data-toggle="modal" data-target="#delete{{post.id}}"><i class="fas fa-trash"></i></a></li>
+                                                                    <!-- modal -->
+                                                                    <div class="modal fade" id="delete{{post.id}}" role="dialog">
+                                                                        <div class="modal-dialog">
+                                                                            <div class="modal-content">
+                                                                                <!-- modal header -->
+                                                                                <div class="modal-header">
+                                                                                    <h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3>
+                                                                                </div>
+                                                                                <!-- modal body -->
+                                                                                <div class="modal-body" style="padding: 20px;"><p>{{ post.content }}</p></div>
+                                                                                <!-- modal footer -->
+                                                                                <div class="modal-footer">
+                                                                                    <button id="postDelete" type="submit" class="active" data-id="{{ post.id }}">Yes, Delete</button>
+                                                                                    <button type="button" data-dismiss="modal">Cancel</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- end of modal -->
+                                                                {% endif %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="job_descp">
+                                                        {% if post.image %}
+                                                            <div class="post-image-box mt-3">
+                                                                <img src="{{ post.image.url }}" alt="" width="500">
+                                                            </div>
+                                                            <br>
+                                                        {% endif %}
+                                                        {% if post.video %}
+                                                            <div class="post-video-box mt-3">
+                                                                <video width="200" controls>
+                                                                    <source src='{{ MEDIA_URL }}{{ post.video }}' type='video/mp4'>
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if post.content|length > 150 %}
+                                                            <p id="half-{{ post.id }}" class="mt-3">{{ post.content|truncatechars:150 }}<a data-id="{{ post.id }}" href="javascript:void();" class="show-hide-txt"> view more</a></p>
+                                                            <p id="full-{{ post.id }}" class="mt-3" style="display: none;">{{ post.content }}</p>
+                                                        {% else %}
+                                                            <p class="mt-3">{{ post.content }}</p>
+                                                        {% endif %}
+
+                                                        <ul class="skill-tags">
+                                                            <li><a href="{% url 'posts:category_detail' pk=post.category.id slug=post.category.slug %}">{{ post.category.title }}</a></li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="job-status-bar">
+                                                        <div class="like-com">
+                                                            <p class="comment-count{{ post.id }}" style="color: #000;"><i class="fas fa-comment-alt mr-3"></i>{{ post.comments_num }}</p>
+                                                            <form action="{% url 'posts:high_fived' %}" method="post" class="high_five-form" id="{{ post.id }}">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="post_id" value="{{ post.id }}">
+
+                                                                <button type="submit" class="high_five-btn{{ post.id }}" style="background: none; padding: 0px; border: none; display: inline; font-size: 14px;"><i class="fas fa-hand-sparkles"></i>
+                                                                    {% if profile not in post.high_fived.all %}
+                                                                        High Five
+                                                                    {% else %}
+                                                                        Take Back
+                                                                    {% endif %}
+                                                                </button>
+                                                                <p class="high_five-count{{ post.id }} ml-3" style="display: inline; color: #000;">{{ post.high_fives_num }}</p>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="com com-btn" style="background: none; padding: 0px; border: none;"><i class="fas fa-chevron-down"></i></button>
+                                                    <div class="com-list" id="comList" style="display: none;">
+                                                        {% if post.comment_set.all %}
+                                                            {% for comment in post.comment_set.all %}
+                                                                {% if comment.user.user.is_active %}
+                                                                    <div class="comCard" data-id="{{ comment.id }}">
+                                                                        <div class="commenter">
+                                                                            <div>
+                                                                                {% if comment.user.user == request.user %}
+                                                                                    <a href="#" class="view-more-pro">
+                                                                                        <img src="{{ comment.user.get_avatar }}" class="mr-3 com-pic">
+                                                                                        <span id="com-name">{{ comment.user.user }}</span>
+                                                                                    </a>
+                                                                                {% else %}
+                                                                                    <a href="{% url 'users:profile_detail' slug=comment.user.slug sender_id=request.user.id %}" class="view-more-pro">
+                                                                                        <img src="{{ comment.user.get_avatar }}" class="mr-3">
+                                                                                        <span>{{ comment.user.user }}</span>
+                                                                                    </a>
+                                                                                {% endif %}
+
+                                                                                <p class="ml-1">{{ comment.created|timesince }}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <div class="ed-opts">
+                                                                                    <ul class="bk-links">
+                                                                                        <li><a href="" data-toggle="modal" data-target="#delete-com{{comment.id}}"><i class="fas fa-trash"></i></a></li>
+                                                                                        <!-- modal -->
+                                                                                        <div class="modal fade" id="delete-com{{comment.id}}" role="dialog">
+                                                                                            <div class="modal-dialog">
+                                                                                                <div class="modal-content">
+                                                                                                    <!-- modal header -->
+                                                                                                    <div class="modal-header">
+                                                                                                        <h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3>
+                                                                                                    </div>
+                                                                                                    <!-- modal body -->
+                                                                                                    <div class="modal-body" style="padding: 20px;"><p>{{ comment.body }}</p></div>
+                                                                                                    <!-- modal footer -->
+                                                                                                    <div class="modal-footer">
+                                                                                                        <button id="comDelete" type="submit" class="active" data-id="{{ comment.id }}">Yes, Delete</button>
+                                                                                                        <button type="button" data-dismiss="modal">Cancel</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <!-- end of modal -->
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="job_descp">
+                                                                            {% if comment.body|length > 150 %}
+                                                                                <p id="half-{{ comment.id }}" class="mb-3 ml-5">{{ comment.body|truncatechars:150 }}<a data-id="{{ comment.id }}" href="javascript:void();" class="show-hide-com"> view more</a></p>
+                                                                                <p id="full-{{ comment.id }}" class="mb-3 ml-5" style="display: none;">{{ comment.body }}</p>
+                                                                            {% else %}
+                                                                                <p class="mb-3 ml-5">{{ comment.body }}</p>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="post-comment">
+                                                        <div class="comment_box mt-2">
+                                                            <form action="{% url 'posts:comment' %}" method="post" class="comment_form" id="addComForm">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="post_id" value={{ post.id }}>
+                                                                <input type="hidden" name="comment_id" value={{ comment.id }}>
+                                                                {% comment_tag %}
+                                                                <button id="addComBtn" type="button" data-id="{{ comment.id }}">Send</button>
+                                                            </form>
+                                                        </div>
+                                                    </div><!--post-comment end-->
+                                                </div><!--post-bar end-->
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div><!--posts-section end-->
+                                </div><!--product-feed-tab end-->
+                                <!-- **** END OF FEED **** -->
+
+                                <!-- **** INFO **** -->
+                                <div class="product-feed-tab" id="info-dd">
+                                    <div class="star-descp">
+                                        <span id="location">{{ profile.location }}</span>
+                                        <span id="birthday">{{ profile.birthday }}</span>
+                                    </div><!--star-descp end-->
+                                    <div class="user-profile-ov">
+                                        <p id="bio">{{ profile.bio }}</p>
+                                    </div><!--user-profile-ov end-->
+                                </div><!--product-feed-tab end-->
+                                <!-- **** END OF INFO **** -->
+                            </div><!--main-ws-sec end-->
+                        </div>
+                    </div>
+                </div><!-- main-section-data end-->
+            </div>
+        </div>
+    </main>
+
+    <!-- pic update modal -->
+    <div class="modal" tabindex="-1" id="update-pic">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update your avatar</h5>
+                </div>
+                <form action="{% url 'users:my_profile' %}" method="post" enctype="multipart/form-data" class="p-3" id="edit-form">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <label style="cursor: pointer;"><i class="fas fa-camera ml-5" style="font-size: 32px;"></i><p> Select your new image</p>
+                            {{ p_form.avatar }}
+                        </label>
+                        <div id="profile-pic-box"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="message-btn active">
+                            <button id="update-btn" type="button"><i class="fas fa-edit"></i>Update</button>
+                            <button type="button" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- end of modal -->
+
+    <!-- Profile Pic Modal -->
+    <div class="modal fade" id="profilePicModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body text-center" id="modal-body"></div>
+                <div class="modal-footer message-btn">
+                    <button type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- view profile pic -->
+    <script>
+        $(document).on('click', '.profile-image', function(){
+            const modalBody = document.getElementById('modal-body')
+            const profileImage = document.getElementsByClassName('user-pro-img')
+            const pic = $(profileImage).attr('data-pic')
+            modalBody.innerHTML = `<img src="${pic}" width=500>`
+        })
+    </script>
+
+    <!--	delete posts-->
+	<script>
+        $(document).ready(function() {
+			var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+			$('.post-bar').on('click', '#postDelete', function() {
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+				$.ajax({
+                    url: '/delete-post/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                    	console.log('success')
+                    	$('.post-bar[data-id="' + dataId + '"]').remove()
+                        $('#delete{{post.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Post deleted'
+                        })
+
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+
+            });
+        });
+    </script>
+
+	<!--	add comments-->
+	<script>
+		$(document).ready(function() {
+
+			$('.post-comment').on('click', '#addComBtn', function() {
+
+                var serializedData = $(this).closest("form").serialize();
+                console.log('click')
+                var dataId = $(this).data('id');
+
+				var comment_id = $(this).closest("form").find("input[name=comment_id]").val()
+				console.log(comment_id)
+				console.log($(this).closest(".post-comment").prev(".com-list").find(".comCard:last").data('id'))
+				var comments_div = $(this).closest(".post-comment").prev(".com-list");
+				var form = $(this).closest("form");
+
+				const post_id = $('.post-bar').data('id')
+				let res;
+                const commentsNum = $(`.comment-count${post_id}`).text()
+                const trimCount = parseInt(commentsNum)
+
+				var avatar = $('.com-pic').attr('src');
+				var name = $('#com-name').text();
+
+                $.ajax({
+                    url: /comment/,
+                    data: serializedData,
+                    type: 'POST',
+                    success: function(response) {
+  						console.log(response.comment)
+						$(comments_div).append('<div class="comCard" data-id="' + response.comment.id + '"><div class="commenter"><div><a href="{% url 'users:my_profile' %}" class="view-more-pro"><img src="' + avatar + '" style="height: 30px;" class="mr-3"><span>' + name + '</span></a><p class="ml-1" style="display: inline-block; color: #b2b2b2;">' + "just now" + '</p></div><div><div class="ed-opts"><ul class="bk-links"><li><a href="" data-toggle="modal" data-target="#delete-com' + response.comment.id + '"><i class="fas fa-trash"></i></a></li><div class="modal fade" id="delete-com' + response.comment.id + '" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3></div><div class="modal-body" style="padding: 20px;"><p>' + response.comment.body + '</p></div><div class="modal-footer"><button id="comDelete" type="submit" class="active" data-id="' + response.comment.id + '">Yes, Delete</button><button type="button" data-dismiss="modal">Cancel</button></div></div></div></div></ul></div></div></div><p class="mb-3 ml-5">' + response.comment.body + '</p></div>')
+                        res = trimCount + 1
+						$(`.comment-count${post_id}`).text(res).prepend('<i class="fas fa-comment-alt mr-3"></i>')
+
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Comment added'
+                            })
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+
+                form.trigger("reset");
+            });
+		});
+	</script>
+
+	<!--	delete comments-->
+	<script>
+        $(document).ready(function() {
+			var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+            $('.com-list').on('click', '#comDelete', function() {
+
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+                $.ajax({
+                    url: '/delete-comment/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                    	console.log('success')
+                        $('.comCard[data-id="' + dataId + '"]').remove()
+                        $('#delete-com{{comment.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Comment deleted'
+                        })
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+            });
+        });
+    </script>
+
+    <!-- view more posts -->
+   <script type="text/javascript">
+    $(document).on('click', function(){
+        $(".show-hide-txt").click(function(){
+            var id = $(this).data("id");
+            $("#half-"+id).hide();
+            $("#full-"+id).show();
+        });
+   });
+   </script>
+
+    <!-- view more comments -->
+   <script type="text/javascript">
+     $(document).on('click', function(){
+       $(".show-hide-com").click(function(){
+            var comId = $(this).data("id");
+            $("#half-"+comId).hide();
+            $("#full-"+comId).show();
+        });
+      });
+   </script>
+
+<!-- high five and take back -->
+  <script type="text/javascript">
+  $(document).on('click', function(){
+		$('.high_five-form').submit(function(e){
+
+          e.preventDefault()
+
+          const post_id = $(this).attr('id')
+
+          const high_fiveText = $(`.high_five-btn${post_id}`).text()
+          const trim = $.trim(high_fiveText)
+
+          const url = $(this).attr('action')
+
+          let res;
+          const high_fives = $(`.high_five-count${post_id}`).text()
+          const trimCount = parseInt(high_fives)
+
+          $.ajax({
+              type: 'POST',
+              url: url,
+              data: {
+                  'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                  'post_id': post_id,
+              },
+              success: function(response) {
+                  if(trim === 'Take Back') {
+                      $(`.high_five-btn${post_id}`).text('High Five').prepend('<i class="fas fa-hand-sparkles"></i>')
+                      res = trimCount - 1
+                  } else {
+                      $(`.high_five-btn${post_id}`).text('Take Back').prepend('<i class="fas fa-hand-sparkles"></i>')
+                      res = trimCount + 1
+                  }
+                  $(`.high_five-count${post_id}`).text(res)
+              },
+              error: function(response) {
+                  console.log('error', response)
+              }
+          })
+      })
+		});
+	</script>
+
+<!-- show/hide comments-->
+	<script>
+		$(document).on('click', '.com-btn', function(){
+			$("i", this).toggleClass("fas fa-chevron-down fas fa-chevron-up");
+
+			if($("i", this).hasClass('fa-chevron-up')) {
+				$(this).next(".com-list").show("slow");
+			} else {
+				$(this).next(".com-list").hide("slow");
+			}
+		});
+	</script>
+
+    <!-- Crop Profile Pic-->
+    <script>
+        const profilePicBox = document.getElementById('profile-pic-box')
+        const editForm = document.getElementById('edit-form')
+        const updateBtn = document.getElementById('update-btn')
+        const input = document.getElementById('id_avatar')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')
+
+        input.addEventListener('change', () => {
+            console.log('changed')
+
+            const img_data = input.files[0]
+            const url = URL.createObjectURL(img_data)
+            profilePicBox.innerHTML = `<img src="${url}" id="image">`
+
+            var $image = $('#image');
+
+            $image.cropper({
+                aspectRatio: 1 / 1,
+                crop: function(event) {
+                    console.log(event.detail.x);
+                    console.log(event.detail.y);
+                    console.log(event.detail.width);
+                    console.log(event.detail.height);
+                    console.log(event.detail.rotate);
+                    console.log(event.detail.scaleX);
+                    console.log(event.detail.scaleY);
+                }
+            });
+
+            var cropper = $image.data('cropper');
+
+            updateBtn.addEventListener('click', () => {
+                cropper.getCroppedCanvas().toBlob((blob) => {
+                    const fd = new FormData()
+                    fd.append('csrfmiddlewaretoken', csrf[0].value)
+                    fd.append('avatar', blob, 'my-profile-pic.png')
+                    console.log(cropper)
+                    console.log(fd)
+                    console.log(blob)
+
+                    $.ajax({
+                        type: 'POST',
+                        url: editForm.action,
+                        enctype: 'multipart/form-data',
+                        data: fd,
+                        success: function(response) {
+
+<!--                            $('.profile-image').attr('src', url);-->
+
+                            $('#update-pic').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            })
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Avatar updated. Refresh to see changes.'
+                            })
+                        },
+                        error: function(error) {
+                            console.log(error)
+                        },
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                    })
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

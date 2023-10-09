@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}My Received Invites{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>Invites Received</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <section class="companies-info">
+        <div class="container">
+            <div class="companies-list-container">
+                <div class="row">
+                    {% if is_empty %}
+                        <h1 class="ml-5">You don't have any invitations right now...</h1>
+                    {% endif %}
+                    {% for obj in qs %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                            {% if obj.user.is_active %}
+                                <div class="company_profile_info">
+                                    <div class="company-up-info">
+                                        <img src="{{ obj.avatar.url }}" alt="">
+                                        <h3><a href="{% url 'users:profile_detail' slug=obj.slug sender_id=request.user.id %}" class="view-more-pro">{{ obj.user }}</a></h3>
+                                        <h4>{{ obj.status }}</h4>
+                                        <ul>
+                                            <li>
+                                                <form action="{% url 'users:accept_invite' %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="profile_pk" value="{{ obj.pk }}">
+                                                    <button type="submit" class="follow" style="border: none;"><i class="fas fa-check pr-2"></i>Hey Buddy!</button>
+                                                </form>
+                                            </li>
+                                            <li><br></li>
+                                            <li>
+                                                <form action="{% url 'users:reject_invite' %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="profile_pk" value="{{ obj.pk }}">
+                                                    <button type="submit" class="message-us" style="border: none;"><i class="fas fa-times pr-2"></i>Nah Buddy!</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div><!--company_profile_info end-->
+                            {% else %}
+                                <div class="company_profile_info" style="background-color: #a9a9a9;">
+                                    <div class="company-up-info">
+                                        <img src="{{ obj.avatar.url }}" alt="">
+                                        <h3><a href="{% url 'users:profile_detail' slug=obj.slug sender_id=request.user.id %}" class="view-more-pro">{{ obj.user }}</a></h3>
+                                        <h4>{{ obj.status }}</h4>
+                                        <ul>
+                                            <li>
+                                                <button style="border: none; background-color: #a9a9a9; color: #000;"><i class="fas fa-power-off pr-2"></i>Buddy deactivated</button>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'users:reject_invite' %}" method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="profile_pk" value="{{ obj.pk }}">
+                                                    <button type="submit" class="message-us" style="border: none;"><i class="fas fa-times pr-2"></i>Nah Buddy!</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div><!--companies-list end-->
+        </div>
+    </section><!--companies-info end-->
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Choose an Exercise{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>{{ area.name|title }}</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+<!--================End Home Banner Area =================-->
+    <main>
+		<div class="main-section">
+			<div class="container">
+				<div class="main-section-data">
+					<div class="row">
+						<div class="col-lg-8 no-pd">
+                            <div class="main-ws-sec">
+                                {% if area.user.user == request.user %}
+                                    <h1 class="mb-3">Choose or create a new {{ area.name|lower }} exercise to work on</h1>
+                                    <form action="{% url 'tracker:exercise_add_new' area.id %}" id="addExerciseForm" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        {% for field in e_form %}
+                                            <div class="mr-3 mb-3">
+                                                {{ field }}
+                                            </div>
+                                        {% endfor %}
+                                        <button id="addExerciseButton" type="button" class="btn btn-primary mr-3 mb-3" style="background-color: #04babd; border-color: #04babd;">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </form>
+                                    <div id="exerciseList" class="posts-section">
+                                        {% for exercise in area.exercise.all %}
+                                            {% if area.user.user == request.user %}
+                                                <div id="exerciseCard" class="card" data-id="{{ exercise.id }}">
+                                                    <div class="card-body message-form-btns">
+                                                        <h3><a href="{% url 'tracker:workout' exercise.id %}">{{ exercise.name|title }}</a></h3>
+                                                        <a href="" data-toggle="modal" data-target="#delete{{exercise.id}}"><i class="fas fa-trash"></i></a>
+                                                        <!-- modal -->
+                                                        <div class="modal fade" id="delete{{exercise.id}}" role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <!-- modal header -->
+                                                                    <div class="modal-header">
+                                                                        <h3 class="modal-title" style="color: #fff;">Do you really want to delete {{ exercise.name }}?</h3>
+                                                                    </div>
+                                                                    <!-- modal body -->
+                                                                    <div class="modal-body"><p>All workouts related to this exercise will be permanently deleted</p></div>
+                                                                    <!-- modal footer -->
+                                                                    <div class="modal-footer message-btn">
+                                                                        <button id="exerciseDelete" type="button" class="active" data-id="{{ exercise.id }}">Yes, Delete</button>
+                                                                        <button type="button" data-dismiss="modal">Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- end of modal -->
+                                                    </div>
+                                                </div><!--post-bar end-->
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div><!--posts-section end-->
+                                {% else %}
+                                    You can only add exercises to areas that you created
+                                {% endif %}
+							</div><!--main-ws-sec end-->
+						</div>
+						{% include 'right_side.html' %}
+					</div>
+				</div><!-- main-section-data end-->
+			</div>
+		</div>
+	</main>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            $('.main-ws-sec').on('click', '#addExerciseButton', function() {
+                console.log('clicked')
+
+                var serializedData = $('#addExerciseForm').serialize();
+                var url = $('#addExerciseForm').attr('action')
+                console.log(url)
+
+                $.ajax({
+                    url: url,
+                    data: serializedData,
+                    type: 'POST',
+                    success: function(response) {
+                        var link = "{% url 'tracker:workout' 123 %}";
+                        var newUrl = link.replace('123', response.exercise.id);
+                        $('#exerciseList').append('<div id="exerciseCard" class="card" data-id="' + response.exercise.id + '"><div class="card-body"><div class="usy-dt"><div class="usy-name"><ul><li><h3><a href="' + newUrl + '">' + response.exercise.name + '</a></h3></li></ul></div></div><div class="ed-opts"><ul class="bk-links"><li><a href="" data-toggle="modal" data-target="#delete' + response.exercise.id + '"><i class="fas fa-trash"></i></a></li><div class="modal fade" id="delete' + response.exercise.id + '" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Do you really want to delete ' + response.exercise.name + '?</h3></div><div class="modal-body" style="padding: 10px;"><p>All workouts related to this exercise will be permanently deleted</p></div><div class="modal-footer"><button id="exerciseDelete" type="submit" class="active" data-id="' + response.exercise.id + '">Yes, Delete</button><button type="button" data-dismiss="modal">Cancel</button></div></div></div></div></div></div></div></div>')
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Exercise added'
+                        })
+                    },
+                    error: function(response) {
+                        console.log('error', response)
+                    }
+                })
+
+                $('#addExerciseForm')[0].reset();
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+            $('#exerciseList').on('click', '#exerciseDelete', function() {
+                console.log('click')
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+                $.ajax({
+                    url: '/tracker/exercise-delete/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                        console.log('success')
+                        $('#exerciseCard[data-id="' + dataId + '"]').remove()
+                        $('#delete{{exercise.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: true,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Exercise deleted'
+                        })
+                    },
+                    error: function(response) {
+                        console.log('error')
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Buddies{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>My Buddies</h2>
+                    {% if profile.get_buddies_num == 1 %}
+                        <p style="color: #fff;">You have {{ profile.get_buddies_num }} buddy</p>
+                    {% else %}
+                        <p style="color: #fff;">You have {{ profile.get_buddies_num }} buddies</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <section class="companies-info">
+        <div class="container">
+            <div class="companies-list infinite-container">
+                <div class="row">
+                    {% if is_empty %}
+                        <h1 class="ml-5">You have not made any Buddies yet...</h1>
+                    {% endif %}
+                    {% for obj in qs %}
+                        <div class="col-lg-3 col-md-4 col-sm-6 col-12 infinite-item" style="display: inline-block;">
+                            {% if obj.user.is_active %}
+                                <div class="company_profile_info">
+                                    <div class="company-up-info">
+                                        <img src="{{ obj.avatar.url }}" alt="">
+                                        <h3><a href="{% url 'users:profile_detail' slug=obj.slug sender_id=request.user.id %}" class="view-more-pro">{{ obj.user }}</a></h3>
+                                        <h4>{{ obj.status }}</h4>
+                                        <ul>
+                                            <li>
+                                                {% if request.user in obj.buddies.all %}
+                                                    <form action="{% url 'users:remove_buddy' %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="profile_pk" value="{{ obj.pk }}">
+                                                        <button type="submit" class="message-us" style="border: none;"><i class="fas fa-minus pr-2"></i>Buddy Out!</button>
+                                                    </form>
+                                                {% endif %}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div><!--company_profile_info end-->
+                            {% else %}
+                                <div class="company_profile_info" style="background-color: #a9a9a9;">
+                                    <div class="company-up-info">
+                                        <img src="{{ obj.avatar.url }}" alt="">
+                                        <h3><a href="{% url 'users:profile_detail' slug=obj.slug sender_id=request.user.id %}" class="view-more-pro">{{ obj.user }}</a></h3>
+                                        <h4>{{ obj.status }}</h4>
+                                        <ul>
+                                            <li>
+                                                <button style="border: none; background-color: #a9a9a9; color: #000;"><i class="fas fa-power-off pr-2"></i>Buddy deactivated</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div><!--companies-list end-->
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="infinite-more-link"></a>
+                <div class="process-comm">
+                    <div class="spinner">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div class="bounce3"></div>
+                    </div>
+                </div><!--process-comm end-->
+            {% endif %}
+
+        </div>
+    </section><!--companies-info end-->
+
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+	<script src="{% static 'js/infinite.min.js' %}"></script>
+
+	<script>
+		var infinite = new Waypoint.Infinite({
+			element: $('.infinite-container')[0],
+			offset: 'bottom-in-view',
+			onBeforePageLoad: function () {
+				$('.spinner').show();
+			},
+			onAfterPageLoad: function () {
+				$('.spinner').hide();
+			}
+		});
+	</script>
+{% endblock %}

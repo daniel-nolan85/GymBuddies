@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inbox{% endblock %}
+
+{% block content %}
+<!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>Inbox</h2>
+<!--                    <p style="color: #fff;">You have {{ paginator.count }} messages</p>-->
+                    {% if messages.count == 1 %}
+                        <p style="color: #fff;">You have {{ messages.count }} message</p>
+                    {% else %}
+                        <p style="color: #fff;">You have {{ messages.count }} messages</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <main>
+		<div class="main-section">
+			<div class="container">
+				<div id="container" class="main-section-data">
+					<div class="row">
+						<div class="col-lg-8">
+							<div class="main-ws-sec infinite-container">
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    <div class="message-form-btns mb-3">
+                                        <input class="toggle-button" type="checkbox">
+                                        <button type="submit" formaction="{% url 'users:read_message' %}">Mark as Read</button>
+                                        <button type="submit" formaction="{% url 'users:unread_message' %}">Mark as Unread</button>
+                                        <i class="fas fa-trash" data-toggle="modal" data-target="#delete{{ msg.id }}"></i>
+                                    </div>
+                                    <!-- modal -->
+                                    <div class="modal fade" id="delete{{area.id}}" role="dialog">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <!-- modal header -->
+                                                <div class="modal-header">
+                                                    <h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete selected messages?</h3>
+                                                </div>
+                                                <!-- modal body -->
+                                                <div class="modal-body" style="padding: 20px;"><p>Selected messages will be permanently deleted</p></div>
+                                                <!-- modal footer -->
+                                                <div class="modal-footer">
+                                                    <button type="submit" formaction="{% url 'users:delete_message' %}" class="active">Yes, Delete</button>
+                                                    <button type="button" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end of modal -->
+                                    {% if messages %}
+                                        {% for msg in messages %}
+                                            <div class="post-bar infinite-item">
+                                                <div class="post_topbar">
+                                                    <div class="usy-dt">
+                                                        <a href="{% url 'users:profile_detail' slug=msg.sender.slug sender_id=request.user.id %}"><img src="{{ msg.sender.get_avatar }}" alt="" style="height: 30px;"></a>
+                                                        <div class="usy-name">
+                                                            <h3><a href="{% url 'users:profile_detail' slug=msg.sender.slug sender_id=request.user.id %}">{{ msg.sender.user }}</a></h3>
+                                                            <span><img src="{% static 'images/clock.png' %}" alt="">{{ msg.timestamp }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="job_descp pl-3 mt-2">
+                                                    <table>
+                                                        <th>
+                                                            <input type="checkbox" class="mr-3" name="message" value="{{ msg.id }}">
+                                                        </th>
+                                                        <th>
+                                                            {% if msg.unread == True %}
+                                                                {% if msg.message|length > 150 %}
+                                                                    <p id="half-{{ msg.id }}" style="font-weight: 900; color: #000;">{{ msg.message|truncatechars:150 }}<a data-id="{{ msg.id }}" href="javascript:void();" class="show-full-msg" style="color: #04babd;"> view more</a></p>
+                                                                    <p id="full-{{ msg.id }}" style="display: none; font-weight: bold; color: #000;">{{ msg.message }}<a data-id="{{ msg.id }}" href="javascript:void();" class="show-less" style="color: #04babd;"> view less</a></p>
+                                                                {% else %}
+                                                                    <p style="font-weight: 900; color: #000;">{{ msg.message }}</p>
+                                                                {% endif %}
+                                                            {% else %}
+                                                                {% if msg.message|length > 150 %}
+                                                                    <p id="half-{{ msg.id }}">{{ msg.message|truncatechars:150 }}<a data-id="{{ msg.id }}" href="javascript:void();" class="show-full-msg" style="color: #04babd;"> view more</a></p>
+                                                                    <p id="full-{{ msg.id }}" style="display: none;">{{ msg.message }}<a data-id="{{ msg.id }}" href="javascript:void();" class="show-less" style="color: #04babd;"> view less</a></p>
+                                                                {% else %}
+                                                                    <p>{{ msg.message }}</p>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </th>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        Your inbox is currently empty
+                                    {% endif %}
+                                </form>
+                            </div>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="infinite-more-link"></a>
+                                <div class="process-comm">
+                                <div class="spinner">
+                                    <div class="bounce1"></div>
+                                    <div class="bounce2"></div>
+                                    <div class="bounce3"></div>
+                                </div>
+                            </div><!--process-comm end-->
+                            {% endif %}
+                        </div>
+                        {% include 'right_side.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+	<script src="{% static 'js/infinite.min.js' %}"></script>
+
+    <script>
+        $('#container .toggle-button').click( function () {
+            $('#container input[type="checkbox"]').prop('checked', this.checked)
+        })
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+			$(".show-full-msg").click(function(){
+				var id = $(this).data("id");
+				$("#half-"+id).hide();
+				$("#full-"+id).show();
+			});
+
+			$(".show-less").click(function(){
+				var id = $(this).data("id");
+				$("#half-"+id).show();
+				$("#full-"+id).hide();
+			});
+        });
+    </script>
+
+	<script>
+		var infinite = new Waypoint.Infinite({
+			element: $('.infinite-container')[0],
+			offset: 'bottom-in-view',
+			onBeforePageLoad: function () {
+				$('.spinner').show();
+			},
+			onAfterPageLoad: function () {
+				$('.spinner').hide();
+			}
+		});
+	</script>
+
+{% endblock %}

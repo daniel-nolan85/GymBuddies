@@ -1,0 +1,480 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block title %}{{ category.title }}{% endblock %}
+
+{% block content %}
+
+    <!--================Home Banner Area =================-->
+    <section class="banner_area">
+        <div class="banner_inner d-flex align-items-center">
+            <div class="overlay bg-parallax" data-stellar-ratio="0.9" data-stellar-vertical-offset="0" data-background=""></div>
+            <div class="container">
+                <div class="banner_content text-center">
+                    <h2>{{ category.title }}</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Home Banner Area =================-->
+    <main>
+        <div class="main-section">
+            <div class="container">
+                <div class="main-section-data">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            {% if category.post_count == 1 %}
+                                <h3 style="font-size: 20px; font-weight: bold;">There is currently {{ category.post_count }} post in the {{ category.title }} category</h3>
+                            {% else %}
+                                <h3 style="font-size: 20px; font-weight: bold;">There are currently {{ category.post_count }} posts in the {{ category.title }} category</h3>
+                            {% endif %}
+                            <br>
+                            <div class="main-ws-sec">
+                                <div class="posts-section infinite-container">
+                                    {% for post in posts %}
+										{% if post.author.user.is_active %}
+											<div class="post-bar infinite-item" data-id="{{ post.id }}">
+												<div class="post_topbar">
+													<div class="usy-dt mb-2">
+														{% if post.author.user == request.user %}
+															<a href="{% url 'users:my_profile' %}"><img src="{{ post.author.get_avatar }}" alt="" style="height: 30px;"></a>
+														{% else %}
+															<a href="{% url 'users:profile_detail' slug=post.author.slug sender_id=request.user.id %}"><img src="{{ post.author.get_avatar }}" alt="" style="height: 30px;"></a>
+														{% endif %}
+														<div class="usy-name">
+															{% if post.author.user == request.user %}
+																<h3><a href="{% url 'users:my_profile' %}">{{ post.author.user }}</a></h3>
+															{% else %}
+																<h3><a href="{% url 'users:profile_detail' slug=post.author.slug sender_id=request.user.id %}">{{ post.author.user }}</a></h3>
+															{% endif %}
+															<span><img src="{% static 'images/clock.png' %}" alt="">{{ post.created|timesince }}</span>
+														</div>
+													</div>
+													<div class="ed-opts">
+														<ul class="bk-links">
+															{% if post.author.user == request.user %}
+																<li><a href="{% url 'posts:update' post.id %}"><i class="fas fa-edit"></i></a></li>
+
+																<li><a href="" data-toggle="modal" data-target="#delete{{post.id}}"><i class="fas fa-trash"></i></a></li>
+																<!-- modal -->
+																<div class="modal fade" id="delete{{post.id}}" role="dialog">
+																	<div class="modal-dialog">
+																		<div class="modal-content">
+																			<!-- modal header -->
+																			<div class="modal-header">
+																				<h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3>
+																			</div>
+																			<!-- modal body -->
+																			<div class="modal-body" style="padding: 20px;"><p>{{ post.content }}</p></div>
+																			<!-- modal footer -->
+																			<div class="modal-footer">
+																				<button id="postDelete" type="submit" class="active" data-id="{{ post.id }}">Yes, Delete</button>
+																				<button type="button" data-dismiss="modal">Cancel</button>
+																			</div>
+																		</div>
+																	</div>
+																</div>
+																<!-- end of modal -->
+															{% endif %}
+														</ul>
+													</div>
+												</div>
+												<div class="job_descp">
+													{% if post.image %}
+														<div class="post-image-box mt-3">
+															<img src="{{ post.image.url }}" alt="" width="500">
+														</div>
+														<br>
+													{% endif %}
+													{% if post.video %}
+														<div class="post-video-box mt-3">
+															<video width='200' controls>
+																<source src='{{ MEDIA_URL }}{{ post.video }}' type='video/mp4'>
+																Your browser does not support the video tag.
+															</video>
+														</div>
+													{% endif %}
+													{% if post.content|length > 150 %}
+														<p id="half-{{ post.id }}" class="mt-3">{{ post.content|truncatechars:150 }}<a data-id="{{ post.id }}" href="javascript:void();" class="show-hide-txt"> view more</a></p>
+														<p id="full-{{ post.id }}" class="mt-3" style="display: none;">{{ post.content }}</p>
+													{% else %}
+														<p class="mt-3">{{ post.content }}</p>
+													{% endif %}
+												</div>
+
+												<div class="job-status-bar">
+													<div class="like-com">
+														<p class="comment-count{{ post.id }}" style="color: #000;"><i class="fas fa-comment-alt mr-3"></i>{{ post.comments_num }}</p>
+														<form action="{% url 'posts:high_fived' %}" method="post" class="high_five-form" id="{{ post.id }}">
+															{% csrf_token %}
+															<input type="hidden" name="post_id" value="{{ post.id }}">
+
+															<button type="submit" class="high_five-btn{{ post.id }}" style="background: none; padding: 0px; border: none; display: inline; font-size: 14px;"><i class="fas fa-hand-sparkles"></i>
+																{% if profile not in post.high_fived.all %}
+																	High Five
+																{% else %}
+																	Take Back
+																{% endif %}
+															</button>
+															<p class="high_five-count{{ post.id }} ml-3" style="display: inline; color: #000;">{{ post.high_fives_num }}</p>
+														</form>
+													</div>
+												</div>
+												<button type="button" class="com com-btn" style="background: none; padding: 0px; border: none;"><i class="fas fa-chevron-down"></i></button>
+												<div class="com-list" id="comList" style="display: none;">
+													{% if post.comment_set.all %}
+														{% for comment in post.comment_set.all %}
+															{% if comment.user.user.is_active %}
+																<div class="comCard" data-id="{{ comment.id }}">
+																	<div class="commenter">
+																		<div>
+																			{% if comment.user.user == request.user %}
+																				<a href="{% url 'users:my_profile' %}" class="view-more-pro">
+																					<img src="{{ comment.user.get_avatar }}" class="mr-3 com-pic">
+																					<span id="com-name">{{ comment.user.user }}</span>
+																				</a>
+																			{% else %}
+																				<a href="{% url 'users:profile_detail' slug=comment.user.slug sender_id=request.user.id %}" class="view-more-pro">
+																					<img src="{{ comment.user.get_avatar }}" class="mr-3">
+																					<span>{{ comment.user.user }}</span>
+																				</a>
+																			{% endif %}
+
+																			<p class="ml-1">{{ comment.created|timesince }}</p>
+																		</div>
+																		<div>
+																			{% if comment.user.user == request.user or post.author.user == request.user %}
+																				<div class="ed-opts">
+																					<ul class="bk-links">
+																						<li><a href="" data-toggle="modal" data-target="#delete-com{{comment.id}}"><i class="fas fa-trash"></i></a></li>
+																						<!-- modal -->
+																						<div class="modal fade" id="delete-com{{comment.id}}" role="dialog">
+																							<div class="modal-dialog">
+																								<div class="modal-content">
+																									<!-- modal header -->
+																									<div class="modal-header">
+																										<h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3>
+																									</div>
+																									<!-- modal body -->
+																									<div class="modal-body" style="padding: 20px;"><p>{{ comment.body }}</p></div>
+																									<!-- modal footer -->
+																									<div class="modal-footer">
+																										<button id="comDelete" type="submit" class="active" data-id="{{ comment.id }}">Yes, Delete</button>
+																										<button type="button" data-dismiss="modal">Cancel</button>
+																									</div>
+																								</div>
+																							</div>
+																						</div>
+																						<!-- end of modal -->
+																					</ul>
+																				</div>
+																			{% endif %}
+																		</div>
+																	</div>
+																	<div class="job_descp">
+																		{% if comment.body|length > 150 %}
+																			<p id="half-{{ comment.id }}" class="mb-3 ml-5">{{ comment.body|truncatechars:150 }}<a data-id="{{ comment.id }}" href="javascript:void();" class="show-hide-com"> view more</a></p>
+																			<p id="full-{{ comment.id }}" class="mb-3 ml-5" style="display: none;">{{ comment.body }}</p>
+																		{% else %}
+																			<p class="mb-3 ml-5">{{ comment.body }}</p>
+																		{% endif %}
+																	</div>
+																</div>
+															{% endif %}
+														{% endfor %}
+													{% endif %}
+												</div>
+												<div class="post-comment">
+													<div class="comment_box mt-2">
+														<form action="{% url 'posts:comment' %}" method="post" class="comment_form" id="addComForm">
+															{% csrf_token %}
+															<input type="hidden" name="post_id" value={{ post.id }}>
+															<input type="hidden" name="comment_id" value={{ comment.id }}>
+															{% comment_tag %}
+															<button id="addComBtn" type="button" data-id="{{ comment.id }}">Send</button>
+														</form>
+													</div>
+												</div><!--post-comment end-->
+											</div><!--post-bar end-->
+										{% endif %}
+                                    {% endfor %}
+                                </div><!--posts-section end-->
+
+								{% if page_obj.has_next %}
+									<a href="?page={{ page_obj.next_page_number }}" class="infinite-more-link"></a>
+                                    <div class="process-comm">
+									<div class="spinner">
+										<div class="bounce1"></div>
+										<div class="bounce2"></div>
+										<div class="bounce3"></div>
+									</div>
+								</div><!--process-comm end-->
+								{% endif %}
+                            </div><!--main-ws-sec end-->
+                        </div>
+                        {% include 'right_side.html' %}
+                    </div>
+                </div><!-- main-section-data end-->
+            </div>
+        </div>
+    </main>
+
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+	<script src="{% static 'js/infinite.min.js' %}"></script>
+
+    <!--	delete posts-->
+	<script>
+        $(document).on('click', function(){
+			var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+			$('.post-bar').on('click', '#postDelete', function() {
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+				$.ajax({
+                    url: '/delete-post/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                    	console.log('success')
+                    	$('.post-bar[data-id="' + dataId + '"]').remove()
+                        $('#delete{{post.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Post deleted'
+                        })
+
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+
+            });
+        });
+    </script>
+
+    <!--	add comments-->
+	<script>
+		$(document).on('click', function(){
+
+			$('.post-comment').on('click', '#addComBtn', function() {
+
+                var serializedData = $(this).closest("form").serialize();
+                console.log('click')
+                var dataId = $(this).data('id');
+
+				var comment_id = $(this).closest("form").find("input[name=comment_id]").val()
+				console.log(comment_id)
+				console.log($(this).closest(".post-comment").prev(".com-list").find(".comCard:last").data('id'))
+				var comments_div = $(this).closest(".post-comment").prev(".com-list");
+				var form = $(this).closest("form");
+
+				const post_id = $('.post-bar').data('id')
+				let res;
+                const commentsNum = $(`.comment-count${post_id}`).text()
+                const trimCount = parseInt(commentsNum)
+                console.log(trimCount)
+                const newComCount = $(`.comment-count${post_id}`).text(res)
+
+				var avatar = $('.com-pic').attr('src');
+				var name = $('#com-name').text();
+
+                $.ajax({
+                    url: /comment/,
+                    data: serializedData,
+                    type: 'POST',
+                    success: function(response) {
+  						console.log(response.comment)
+						$(comments_div).append('<div class="comCard" data-id="' + response.comment.id + '"><div class="commenter"><div><a href="{% url 'users:my_profile' %}" class="view-more-pro"><img src="' + avatar + '" style="height: 30px;" class="mr-3"><span>' + name + '</span></a><p class="ml-1" style="display: inline-block; color: #b2b2b2;">' + "just now" + '</p></div><div><div class="ed-opts"><ul class="bk-links""><li><a href="" data-toggle="modal" data-target="#delete-com' + response.comment.id + '"><i class="fas fa-trash"></i></a></li><div class="modal fade" id="delete-com' + response.comment.id + '" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h3 class="modal-title" style="color: #fff; font-weight: bold;">Do you really want to delete?</h3></div><div class="modal-body" style="padding: 20px;"><p>' + response.comment.body + '</p></div><div class="modal-footer"><button id="comDelete" type="submit" class="active" data-id="' + response.comment.id + '">Yes, Delete</button><button type="button" data-dismiss="modal">Cancel</button></div></div></div></div></ul></div></div></div><p class="mb-3 ml-5">' + response.comment.body + '</p></div>')
+						res = trimCount + 1
+						$(`.comment-count${post_id}`).text(res).prepend('<i class="fas fa-comment-alt mr-3"></i>')
+
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Comment added'
+                            })
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+
+                form.trigger("reset");
+            });
+		});
+	</script>
+
+    <!--	delete comments-->
+	<script>
+        $(document).on('click', function(){
+			var csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+            $('.com-list').on('click', '#comDelete', function() {
+
+
+                var dataId = $(this).data('id');
+                console.log(dataId)
+
+                $.ajax({
+                    url: '/delete-comment/' + dataId,
+                    data: {
+                        csrfmiddlewaretoken: csrfToken,
+                        id: dataId
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function() {
+                    	console.log('success')
+                        $('.comCard[data-id="' + dataId + '"]').remove()
+                        $('#delete-com{{comment.id}}').modal('hide');$('body').removeClass('modal-open');$('.modal-backdrop').remove();
+                    	const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: true,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Comment deleted'
+                        })
+                    },
+                    error: function(error) {
+                        console.log('error')
+                    }
+                })
+            });
+        });
+    </script>
+
+
+	<script>
+		var infinite = new Waypoint.Infinite({
+			element: $('.infinite-container')[0],
+			offset: 'bottom-in-view',
+			onBeforePageLoad: function () {
+				$('.spinner').show();
+			},
+			onAfterPageLoad: function () {
+				$('.spinner').hide();
+			}
+		});
+	</script>
+
+	<!-- view more posts -->
+   <script type="text/javascript">
+    $(document).on('click', function(){
+        $(".show-hide-txt").click(function(){
+            var id = $(this).data("id");
+            $("#half-"+id).hide();
+            $("#full-"+id).show();
+        });
+   });
+   </script>
+
+    <!-- view more comments -->
+   <script type="text/javascript">
+     $(document).on('click', function(){
+       $(".show-hide-com").click(function(){
+            var comId = $(this).data("id");
+            $("#half-"+comId).hide();
+            $("#full-"+comId).show();
+        });
+      });
+   </script>
+
+<!-- high five and take back -->
+  <script type="text/javascript">
+  $(document).on('click', function(){
+		$('.high_five-form').submit(function(e){
+
+          e.preventDefault()
+
+          const post_id = $(this).attr('id')
+
+          const high_fiveText = $(`.high_five-btn${post_id}`).text()
+          const trim = $.trim(high_fiveText)
+
+          const url = $(this).attr('action')
+
+          let res;
+          const high_fives = $(`.high_five-count${post_id}`).text()
+          const trimCount = parseInt(high_fives)
+
+          $.ajax({
+              type: 'POST',
+              url: url,
+              data: {
+                  'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                  'post_id': post_id,
+              },
+              success: function(response) {
+                  if(trim === 'Take Back') {
+                      $(`.high_five-btn${post_id}`).text('High Five').prepend('<i class="fas fa-hand-sparkles"></i>')
+                      res = trimCount - 1
+                  } else {
+                      $(`.high_five-btn${post_id}`).text('Take Back').prepend('<i class="fas fa-hand-sparkles"></i>')
+                      res = trimCount + 1
+                  }
+                  $(`.high_five-count${post_id}`).text(res)
+              },
+              error: function(response) {
+                  console.log('error', response)
+              }
+          })
+      })
+		});
+	</script>
+
+<!-- show/hide comments-->
+	<script>
+		$(document).on('click', '.com-btn', function(){
+			$("i", this).toggleClass("fas fa-chevron-down fas fa-chevron-up");
+
+			if($("i", this).hasClass('fa-chevron-up')) {
+				$(this).next(".com-list").show("slow");
+			} else {
+				$(this).next(".com-list").hide("slow");
+			}
+		});
+	</script>
+
+    <script>
+        if ( window.history.replaceState ) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+    </script>
+{% endblock %}

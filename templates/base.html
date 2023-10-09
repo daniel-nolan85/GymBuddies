@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/line-awesome.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/line-awesome-font-awesome.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/all.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome.min.css' %}">
+		<link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/jquery.mCustomScrollbar.min.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'lib/slick/slick.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'lib/slick/slick-theme.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+		<link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+		<title>{% block title %}{% endblock title %} | Gym Buddies</title>
+	</head>
+
+	<body>
+		<div class="wrapper">
+			<header>
+				<div class="container">
+					<div class="header-data">
+						<div class="logo">
+							<a href="{% url 'posts:index' %}" title=""><img src="{% static 'logo/logo-pic.png' %}" alt="" height="40px"></a>
+						</div><!--logo end-->
+
+						<div class="search-bar">
+							<form action="{% url 'posts:search' %}" method="get">
+								<input type="text" name="q" placeholder="Search posts...">
+								<button type="submit"><i class="la la-search" style="color: #1f0642;"></i></button>
+							</form>
+						</div><!--search-bar end-->
+						<nav>
+							<ul>
+								<li>
+									<a href="{% url 'posts:index' %}" title="">
+										<span><i class="fas fa-home"></i></span>
+										Home
+									</a>
+								</li>
+								<li>
+									<a href="{% url 'tracker:areas' %}">
+										<span><i class="fas fa-dumbbell"></i></span>
+										Tracker
+									</a>
+								</li>
+								<li>
+									<a href="#" title="">
+										<span><i class="fas fa-hands-helping"></i></span>
+										Buddies {% if invites_num > 0 %}<span class="badge badge-danger">{{ invites_num }}</span>{% endif %}
+									</a>
+									<ul>
+										<li><a href="{% url 'users:all_profiles' %}">All Buddies</a></li>
+										<li><a href="{% url 'users:my_buddies' %}">My Buddies</a></li>
+										<li><a href="{% url 'users:invite_profiles' %}">Buddies Pending</a></li>
+										<li><a href="{% url 'users:my_invites' %}">Buddy Invites {% if invites_num > 0 %}<span class="badge badge-danger">{{ invites_num }}</span>{% endif %}</a></li>
+										<li><a href="#" data-toggle="modal" data-target="#find-buddy">Find a Buddy</a></li>
+									</ul>
+								</li>
+								<li>
+									<a href="{% url 'posts:category_list' %}">
+										<span><i class="fas fa-list-ul"></i></span>
+										Categories
+									</a>
+								</li>
+								<li>
+									<a href="{% url 'users:messages' %}">
+										<span><i class="fas fa-envelope-open-text"></i></span>
+										Messages {% if profile.get_unread_messages_num > 0 %}<span class="badge badge-danger">{{ profile.get_unread_messages_num }}</span>{% endif %}
+									</a>
+								</li>
+							</ul>
+
+						</nav><!--nav end-->
+
+						<div class="menu-btn">
+							<a href="#" title=""><i class="fa fa-bars" style="color: #1f0642;"></i></a>
+						</div><!--menu-btn end-->
+
+						<div class="user-account">
+							<div class="user-info">
+								<img src="{{ pic }}" alt="" style="height: 30px; cursor: pointer;">
+								<i class="la la-sort-down" style="color: #1f0642;"></i>
+							</div>
+							<div class="user-account-settingss " id="users">
+								<h3><a href="{% url 'users:my_profile' %}" class="view-more-pro">{{ user.username }}</a></h3>
+								<ul class="us-links">
+									<li><a href="{% url 'posts:acknowledgements' %}" class="view-more-pro">Acknowledgements</a></li>
+									<li><a href="{% url 'account_change_password' %}" class="view-more-pro">Change Password</a></li>
+									<li><a href="#" data-toggle="modal" data-target="#deactivate" class="view-more-pro">Deactivate Account</a></li>
+								</ul>
+								<h3><a href="#" data-toggle="modal" data-target="#logout" class="view-more-pro">Logout</a></h3>
+							</div><!--user-account-settingss end-->
+						</div>
+					</div><!--header-data end-->
+
+				</div>
+			</header><!--header end-->
+
+			<!-- buddy modal -->
+			<div class="modal fade" id="find-buddy" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- modal header -->
+						<div class="modal-header">
+							<h3 class="modal-title">Buddy Search</h3>
+						</div>
+						<form action="{% url 'users:search' %}" method="get">
+							{% csrf_token %}
+							<!-- modal body -->
+							<div class="modal-body" style="padding: 10px;">
+								<div class="form-group">
+									<div class="form-field" style="padding: 10px;">
+										<input type="text" name="buddy_name" class="form-control" placeholder="Name">
+									</div>
+									<div class="form-field" style="padding: 10px;">
+										<input type="text" name="buddy_location" class="form-control" placeholder="Location">
+									</div>
+								</div>
+							</div>
+							<!-- modal footer -->
+							<div class="modal-footer">
+								<button type="submit" class="active">Search</button>
+								<button type="button" data-dismiss="modal">Cancel</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<!-- end of buddy modal -->
+
+			<!-- logout modal -->
+			<div class="modal fade" id="deactivate" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- modal header -->
+						<div class="modal-header">
+							<h3 class="modal-title">We'll be sorry to see you leave buddy</h3>
+						</div>
+						<!-- modal body -->
+						<div class="modal-body">
+							<p>Do you really want to deactivate your account?</p>
+							<p>You will be required to request reactivation in order to reverse this decision.</p>
+						</div>
+						<!-- modal footer -->
+						<div class="modal-footer">
+							 <form action="{% url 'users:deactivate_user' username=user.username %}" method="post">
+								{% csrf_token %}
+								<button type="submit" class="active">Yes, Deactivate</button>
+								<button type="button" data-dismiss="modal">Cancel</button>
+							 </form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- end of logout modal -->
+
+			<!-- modal -->
+			<div class="modal fade" id="logout" role="dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<!-- modal header -->
+						<div class="modal-header">
+							<h3 class="modal-title">Are you sure you want to log out?</h3>
+						</div>
+						<!-- modal footer -->
+						<div class="modal-footer">
+							 <form action="{% url 'account_logout' %}" method="post">
+								{% csrf_token %}
+								<button type="submit" class="active">Yes, Log Out</button>
+								<button type="button" data-dismiss="modal">Cancel</button>
+							 </form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- end of modal -->
+
+            {% block content %}
+            {% endblock %}
+
+            <footer>
+				<div style="display: flex; justify-content: center;">
+					<a href="{% url 'posts:index' %}"><img class="pb-3" style="height: 80px;" src="{% static 'logo/combo-long.png' %}" alt=""></a>
+					<p class="mt-4">from <a href="http://www.nolancode.com" class="view-more-pro">Nolancode</a> - <script>document.write(new Date().getFullYear())</script></p>
+				</div>
+            </footer>
+        </div>
+
+		{% block scripts %}
+			<script>
+				console.log('hello world')
+				if ( window.history.replaceState ) {
+					window.history.replaceState( null, null, window.location.href );
+				}
+			</script>
+			<script>
+				$("#find-buddy").css("z-index", "999999");
+			</script>
+		{% endblock %}
+
+        <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/popper.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/jquery.mCustomScrollbar.js' %}"></script>
+		<script type="text/javascript" src="{% static 'lib/slick/slick.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/scrollbar.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+		<script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+		<!-- cropper -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
+
+    </body>
+</html>

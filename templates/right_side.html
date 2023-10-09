@@ -1,0 +1,43 @@
+{% load static %}
+
+    <div class="col-lg-4 d-none d-lg-block">
+        <div class="right-sidebar" style="position: sticky; top: 0;" >
+            <div class="user-data full-width">
+                <div class="user-profile">
+                    <div class="username-dt">
+                        <div class="usr-pic">
+                            <a href="{% url 'users:my_profile' %}"><img src="{{ pic }}" alt=""></a>
+                        </div>
+                    </div><!--username-dt end-->
+
+                    <div class="user-specs">
+                        <h3><a href="{% url 'users:my_profile' %}" class="view-more-pro">{{ user.username }}</a></h3>
+                    </div>
+                </div><!--user-profile end-->
+
+                <ul class="user-fw-status">
+                    <li>
+                        <h4 class="mb-1"><a href="{% url 'users:my_buddies' %}">Buddies</a></h4>
+                        <span>{{ profile.get_buddies_num }}</span>
+                    </li>
+                    <li>
+                        <h4 class="mb-1"><a href="{% url 'users:my_profile' %}">Posts</a></h4>
+                        <span>{{ profile.get_posts_num }}</span>
+                    </li>
+                    <li>
+                        <h4 class="mb-1"><a href="#" style="cursor:default;">High Fives Given</a></h4>
+                        <span>{{ profile.get_high_fives_given_num }}</span>
+                    </li>
+                    <li>
+                        <h4 class="mb-1"><a href="#" style="cursor:default;">High Fives Received</a></h4>
+                        <span>{{ profile.get_high_fives_received_num }}</span>
+                    </li>
+                    <li>
+                        <h4 class="mb-1"><a href="#" style="cursor:default;">Buddy Since</a></h4>
+                        <span>{{ profile.created|date }}</span>
+                    </li>
+
+                </ul>
+            </div><!--user-data end-->
+        </div><!--right-sidebar end-->
+    </div>
